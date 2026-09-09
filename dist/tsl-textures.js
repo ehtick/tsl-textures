@@ -280,9 +280,11 @@ const selectPlanar = Fn( ([ pos, selAngles, selCenter, selWidth ])=>{
 
 	var s = spherical( selAngles.x, selAngles.y ).mul( selWidth ).toVar();
 
-	var k = selCenter.sub( s.div( 2 ) ).sub( pos ).dot( s ).div( s.dot( s ) ).negate();
+	//	var k = selCenter.sub( s.div( 2 ) ).sub( pos ).dot( s ).div( s.dot( s ) ).negate();
+	var k = pos.add( s.div( 2 ) ).sub( selCenter ).dot( s ).div( s.dot( s ) ); // reverse ca->ac
 
 	return smoothstep( 0, 1, k );
+
 
 } ).setLayout( {
 	name: 'selectPlanar',
@@ -2253,14 +2255,15 @@ var surfacePos$6 = Fn( ([ pos, angles, center, selectorAngles, selectorCenter, s
 
 
 
-var rotatorRaw = Fn( ([ angles, center, selectorAngles, selectorCenter, selectorWidth ])=>{
+var rotatorRaw = Fn( ([ position, angles, center, selectorAngles, selectorCenter, selectorWidth ])=>{
 
-	return surfacePos$6( positionGeometry, angles, center, selectorAngles, selectorCenter, selectorWidth );
+	return surfacePos$6( position, angles, center, selectorAngles, selectorCenter, selectorWidth );
 
 } ).setLayout( {
 	name: 'rotatorRaw',
 	type: 'vec3',
 	inputs: [
+		{ name: 'position', type: 'vec3' },
 		{ name: 'angles', type: 'vec3' },
 		{ name: 'center', type: 'vec3' },
 		{ name: 'selectorAngles', type: 'vec2' },
@@ -2271,13 +2274,12 @@ var rotatorRaw = Fn( ([ angles, center, selectorAngles, selectorCenter, selector
 
 
 
-var rotatorNormalRaw = Fn( ([ angles, center, selectorAngles, selectorCenter, selectorWidth ]) => {
+var rotatorNormalRaw = Fn( ([ position, normalLoc, tangentLoc, angles, center, selectorAngles, selectorCenter, selectorWidth ]) => {
 
 	const EPS = 0.01;
 
-	var position = positionGeometry,
-		normal = normalLocal.normalize().toVar(),
-		tangent = tangentLocal.normalize().mul( EPS ).toVar(),
+	var normal = normalLoc.normalize().toVar(),
+		tangent = tangentLoc.normalize().mul( EPS ).toVar(),
 		bitangent = cross( normal, tangent ).normalize().mul( EPS ).toVar();
 
 	var pos = surfacePos$6( position, angles, center, selectorAngles, selectorCenter, selectorWidth );
@@ -2290,6 +2292,9 @@ var rotatorNormalRaw = Fn( ([ angles, center, selectorAngles, selectorCenter, se
 	name: 'rotatorNormalRaw',
 	type: 'vec3',
 	inputs: [
+		{ name: 'position', type: 'vec3' },
+		{ name: 'normalLoc', type: 'vec3' },
+		{ name: 'tangentLoc', type: 'vec3' },
 		{ name: 'angles', type: 'vec3' },
 		{ name: 'center', type: 'vec3' },
 		{ name: 'selectorAngles', type: 'vec2' },
@@ -2304,7 +2309,7 @@ function rotator( params={} ) {
 
 	var { angles, center, selectorAngles, selectorCenter, selectorWidth } = { ...defaults$r, ...params };
 
-	return rotatorRaw( angles, center, selectorAngles, selectorCenter, selectorWidth );
+	return rotatorRaw( positionGeometry, angles, center, selectorAngles, selectorCenter, selectorWidth );
 
 }
 
@@ -2314,7 +2319,7 @@ rotator.normal = function ( params={} ) {
 
 	var { angles, center, selectorAngles, selectorCenter, selectorWidth } = { ...defaults$r, ...params };
 
-	return rotatorNormalRaw( angles, center, selectorAngles, selectorCenter, selectorWidth );
+	return rotatorNormalRaw( positionGeometry, normalLocal, tangentLocal, angles, center, selectorAngles, selectorCenter, selectorWidth );
 
 };
 
@@ -2778,14 +2783,15 @@ var surfacePos$3 = Fn( ([ pos, scales, center, selectorAngles, selectorCenter, s
 
 
 
-var scalerRaw = Fn( ([ scales, center, selectorAngles, selectorCenter, selectorWidth ])=>{
+var scalerRaw = Fn( ([ position, scales, center, selectorAngles, selectorCenter, selectorWidth ])=>{
 
-	return surfacePos$3( positionGeometry, scales, center, selectorAngles, selectorCenter, selectorWidth );
+	return surfacePos$3( position, scales, center, selectorAngles, selectorCenter, selectorWidth );
 
 } ).setLayout( {
 	name: 'scalerRaw',
 	type: 'vec3',
 	inputs: [
+		{ name: 'position', type: 'vec3' },
 		{ name: 'scales', type: 'vec3' },
 		{ name: 'center', type: 'vec3' },
 		{ name: 'selectorAngles', type: 'vec2' },
@@ -2796,13 +2802,12 @@ var scalerRaw = Fn( ([ scales, center, selectorAngles, selectorCenter, selectorW
 
 
 
-var scalerNormalRaw = Fn( ([ scales, center, selectorAngles, selectorCenter, selectorWidth ]) => {
+var scalerNormalRaw = Fn( ([ position, normalLoc, tangentLoc, scales, center, selectorAngles, selectorCenter, selectorWidth ]) => {
 
 	var EPS = 0.01;
 
-	var position = positionGeometry,
-		normal = normalLocal.normalize().toVar(),
-		tangent = tangentLocal.normalize().mul( EPS ).toVar(),
+	var normal = normalLoc.normalize().toVar(),
+		tangent = tangentLoc.normalize().mul( EPS ).toVar(),
 		bitangent = cross( normal, tangent ).normalize().mul( EPS ).toVar();
 
 	var pos = surfacePos$3( position, scales, center, selectorAngles, selectorCenter, selectorWidth );
@@ -2815,6 +2820,9 @@ var scalerNormalRaw = Fn( ([ scales, center, selectorAngles, selectorCenter, sel
 	name: 'scalerNormalRaw',
 	type: 'vec3',
 	inputs: [
+		{ name: 'position', type: 'vec3' },
+		{ name: 'normalLoc', type: 'vec3' },
+		{ name: 'tangentLoc', type: 'vec3' },
 		{ name: 'scales', type: 'vec3' },
 		{ name: 'center', type: 'vec3' },
 		{ name: 'selectorAngles', type: 'vec2' },
@@ -2829,7 +2837,7 @@ function scaler( params={} ) {
 
 	var { scales, center, selectorAngles, selectorCenter, selectorWidth } = { ...defaults$m, ...params };
 
-	return scalerRaw( scales, center, selectorAngles, selectorCenter, selectorWidth );
+	return scalerRaw( positionGeometry, scales, center, selectorAngles, selectorCenter, selectorWidth );
 
 }
 
@@ -2839,7 +2847,7 @@ scaler.normal = function ( params={} ) {
 
 	var { scales, center, selectorAngles, selectorCenter, selectorWidth } = { ...defaults$m, ...params };
 
-	return scalerNormalRaw( scales, center, selectorAngles, selectorCenter, selectorWidth );
+	return scalerNormalRaw( positionGeometry, normalLocal, tangentLocal, scales, center, selectorAngles, selectorCenter, selectorWidth );
 
 };
 
@@ -3137,27 +3145,27 @@ var surfacePos$2 = Fn( ([ pos, exponent ])=>{
 
 
 
-var supersphereRaw = Fn( ([ exponent ])=>{
+var supersphereRaw = Fn( ([ position, exponent ])=>{
 
-	return surfacePos$2( positionGeometry, exponent );
+	return surfacePos$2( position, exponent );
 
 } ).setLayout( {
 	name: 'supersphereRaw',
 	type: 'vec3',
 	inputs: [
+		{ name: 'position', type: 'vec3' },
 		{ name: 'exponent', type: 'float' },
 	]
 } );
 
 
 
-var supersphereNormalRaw = Fn( ([ exponent ]) => {
+var supersphereNormalRaw = Fn( ([ position, normalLoc, tangentLoc, exponent ]) => {
 
 	const EPS = 0.01;
 
-	var position = positionGeometry,
-		normal = normalLocal.normalize().toVar(),
-		tangent = tangentLocal.normalize().mul( EPS ).toVar(),
+	var normal = normalLoc.normalize().toVar(),
+		tangent = tangentLoc.normalize().mul( EPS ).toVar(),
 		bitangent = cross( normal, tangent ).normalize().mul( EPS ).toVar();
 
 	var pos = surfacePos$2( position, exponent );
@@ -3170,6 +3178,9 @@ var supersphereNormalRaw = Fn( ([ exponent ]) => {
 	name: 'supersphereRaw',
 	type: 'vec3',
 	inputs: [
+		{ name: 'position', type: 'vec3' },
+		{ name: 'normalLoc', type: 'vec3' },
+		{ name: 'tangentLoc', type: 'vec3' },
 		{ name: 'exponent', type: 'float' },
 	]
 } );
@@ -3180,7 +3191,7 @@ function supersphere( params={} ) {
 
 	var { exponent } = { ...defaults$h, ...params };
 
-	return supersphereRaw( exponent );
+	return supersphereRaw( positionGeometry, exponent );
 
 }
 
@@ -3190,7 +3201,7 @@ supersphere.normal = function ( params={} ) {
 
 	var { exponent } = { ...defaults$h, ...params };
 
-	return supersphereNormalRaw( exponent );
+	return supersphereNormalRaw( positionGeometry, normalLocal, tangentLocal, exponent );
 
 };
 
@@ -3296,14 +3307,15 @@ var surfacePos$1 = Fn( ([ pos, distance, selectorAngles, selectorCenter, selecto
 
 
 
-var translatorRaw = Fn( ([ distance, selectorAngles, selectorCenter, selectorWidth ])=>{
+var translatorRaw = Fn( ([ position, distance, selectorAngles, selectorCenter, selectorWidth ])=>{
 
-	return surfacePos$1( positionGeometry, distance, selectorAngles, selectorCenter, selectorWidth );
+	return surfacePos$1( position, distance, selectorAngles, selectorCenter, selectorWidth );
 
 } ).setLayout( {
 	name: 'translatorRaw',
 	type: 'vec3',
 	inputs: [
+		{ name: 'position', type: 'vec3' },
 		{ name: 'distance', type: 'vec3' },
 		{ name: 'selectorAngles', type: 'vec2' },
 		{ name: 'selectorCenter', type: 'vec3' },
@@ -3313,13 +3325,12 @@ var translatorRaw = Fn( ([ distance, selectorAngles, selectorCenter, selectorWid
 
 
 
-var translatorNormalRaw = Fn( ([ distance, selectorAngles, selectorCenter, selectorWidth ])=>{
+var translatorNormalRaw = Fn( ([ position, normalLoc, tangentLoc, distance, selectorAngles, selectorCenter, selectorWidth ])=>{
 
 	var EPS = 0.01;
 
-	var position = positionGeometry,
-		normal = normalLocal.normalize().toVar(),
-		tangent = tangentLocal.normalize().mul( EPS ).toVar(),
+	var normal = normalLoc.normalize().toVar(),
+		tangent = tangentLoc.normalize().mul( EPS ).toVar(),
 		bitangent = cross( normal, tangent ).normalize().mul( EPS ).toVar();
 
 	var pos = surfacePos$1( position, distance, selectorAngles, selectorCenter, selectorWidth );
@@ -3332,6 +3343,9 @@ var translatorNormalRaw = Fn( ([ distance, selectorAngles, selectorCenter, selec
 	name: 'translatorNormalRaw',
 	type: 'vec3',
 	inputs: [
+		{ name: 'position', type: 'vec3' },
+		{ name: 'normalLoc', type: 'vec3' },
+		{ name: 'tangentLoc', type: 'vec3' },
 		{ name: 'distance', type: 'vec3' },
 		{ name: 'selectorAngles', type: 'vec2' },
 		{ name: 'selectorCenter', type: 'vec3' },
@@ -3345,7 +3359,7 @@ function translator( params={} ) {
 
 	var { distance, selectorAngles, selectorCenter, selectorWidth } = { ...defaults$f, ...params };
 
-	return translatorRaw( distance, selectorAngles, selectorCenter, selectorWidth );
+	return translatorRaw( positionGeometry, distance, selectorAngles, selectorCenter, selectorWidth );
 
 }
 
@@ -3355,7 +3369,7 @@ translator.normal = function ( params={} ) {
 
 	var { distance, selectorAngles, selectorCenter, selectorWidth } = { ...defaults$f, ...params };
 
-	return translatorNormalRaw( distance, selectorAngles, selectorCenter, selectorWidth );
+	return translatorNormalRaw( positionGeometry, normalLocal, tangentLocal, distance, selectorAngles, selectorCenter, selectorWidth );
 
 };
 

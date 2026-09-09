@@ -46,14 +46,15 @@ var surfacePos = Fn( ([ pos, angles, center, selectorAngles, selectorCenter, sel
 
 
 
-var rotatorRaw = Fn( ([ angles, center, selectorAngles, selectorCenter, selectorWidth ])=>{
+var rotatorRaw = Fn( ([ position, angles, center, selectorAngles, selectorCenter, selectorWidth ])=>{
 
-	return surfacePos( positionGeometry, angles, center, selectorAngles, selectorCenter, selectorWidth );
+	return surfacePos( position, angles, center, selectorAngles, selectorCenter, selectorWidth );
 
 } ).setLayout( {
 	name: 'rotatorRaw',
 	type: 'vec3',
 	inputs: [
+		{ name: 'position', type: 'vec3' },
 		{ name: 'angles', type: 'vec3' },
 		{ name: 'center', type: 'vec3' },
 		{ name: 'selectorAngles', type: 'vec2' },
@@ -64,13 +65,12 @@ var rotatorRaw = Fn( ([ angles, center, selectorAngles, selectorCenter, selector
 
 
 
-var rotatorNormalRaw = Fn( ([ angles, center, selectorAngles, selectorCenter, selectorWidth ]) => {
+var rotatorNormalRaw = Fn( ([ position, normalLoc, tangentLoc, angles, center, selectorAngles, selectorCenter, selectorWidth ]) => {
 
 	const EPS = 0.01;
 
-	var position = positionGeometry,
-		normal = normalLocal.normalize().toVar(),
-		tangent = tangentLocal.normalize().mul( EPS ).toVar(),
+	var normal = normalLoc.normalize().toVar(),
+		tangent = tangentLoc.normalize().mul( EPS ).toVar(),
 		bitangent = cross( normal, tangent ).normalize().mul( EPS ).toVar();
 
 	var pos = surfacePos( position, angles, center, selectorAngles, selectorCenter, selectorWidth );
@@ -83,6 +83,9 @@ var rotatorNormalRaw = Fn( ([ angles, center, selectorAngles, selectorCenter, se
 	name: 'rotatorNormalRaw',
 	type: 'vec3',
 	inputs: [
+		{ name: 'position', type: 'vec3' },
+		{ name: 'normalLoc', type: 'vec3' },
+		{ name: 'tangentLoc', type: 'vec3' },
 		{ name: 'angles', type: 'vec3' },
 		{ name: 'center', type: 'vec3' },
 		{ name: 'selectorAngles', type: 'vec2' },
@@ -97,7 +100,7 @@ function rotator( params={} ) {
 
 	var { angles, center, selectorAngles, selectorCenter, selectorWidth } = { ...defaults, ...params };
 
-	return rotatorRaw( angles, center, selectorAngles, selectorCenter, selectorWidth );
+	return rotatorRaw( positionGeometry, angles, center, selectorAngles, selectorCenter, selectorWidth );
 
 }
 
@@ -107,7 +110,7 @@ rotator.normal = function ( params={} ) {
 
 	var { angles, center, selectorAngles, selectorCenter, selectorWidth } = { ...defaults, ...params };
 
-	return rotatorNormalRaw( angles, center, selectorAngles, selectorCenter, selectorWidth );
+	return rotatorNormalRaw( positionGeometry, normalLocal, tangentLocal, angles, center, selectorAngles, selectorCenter, selectorWidth );
 
 };
 

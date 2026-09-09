@@ -298,9 +298,11 @@ const selectPlanar = Fn( ([ pos, selAngles, selCenter, selWidth ])=>{
 
 	var s = spherical( selAngles.x, selAngles.y ).mul( selWidth ).toVar();
 
-	var k = selCenter.sub( s.div( 2 ) ).sub( pos ).dot( s ).div( s.dot( s ) ).negate();
+	//	var k = selCenter.sub( s.div( 2 ) ).sub( pos ).dot( s ).div( s.dot( s ) ).negate();
+	var k = pos.add( s.div( 2 ) ).sub( selCenter ).dot( s ).div( s.dot( s ) ); // reverse ca->ac
 
 	return smoothstep( 0, 1, k );
+
 
 } ).setLayout( {
 	name: 'selectPlanar',

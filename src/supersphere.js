@@ -42,27 +42,27 @@ var surfacePos = Fn( ([ pos, exponent ])=>{
 
 
 
-var supersphereRaw = Fn( ([ exponent ])=>{
+var supersphereRaw = Fn( ([ position, exponent ])=>{
 
-	return surfacePos( positionGeometry, exponent );
+	return surfacePos( position, exponent );
 
 } ).setLayout( {
 	name: 'supersphereRaw',
 	type: 'vec3',
 	inputs: [
+		{ name: 'position', type: 'vec3' },
 		{ name: 'exponent', type: 'float' },
 	]
 } );
 
 
 
-var supersphereNormalRaw = Fn( ([ exponent ]) => {
+var supersphereNormalRaw = Fn( ([ position, normalLoc, tangentLoc, exponent ]) => {
 
 	const EPS = 0.01;
 
-	var position = positionGeometry,
-		normal = normalLocal.normalize().toVar(),
-		tangent = tangentLocal.normalize().mul( EPS ).toVar(),
+	var normal = normalLoc.normalize().toVar(),
+		tangent = tangentLoc.normalize().mul( EPS ).toVar(),
 		bitangent = cross( normal, tangent ).normalize().mul( EPS ).toVar();
 
 	var pos = surfacePos( position, exponent );
@@ -75,6 +75,9 @@ var supersphereNormalRaw = Fn( ([ exponent ]) => {
 	name: 'supersphereRaw',
 	type: 'vec3',
 	inputs: [
+		{ name: 'position', type: 'vec3' },
+		{ name: 'normalLoc', type: 'vec3' },
+		{ name: 'tangentLoc', type: 'vec3' },
 		{ name: 'exponent', type: 'float' },
 	]
 } );
@@ -85,7 +88,7 @@ function supersphere( params={} ) {
 
 	var { exponent } = { ...defaults, ...params };
 
-	return supersphereRaw( exponent );
+	return supersphereRaw( positionGeometry, exponent );
 
 }
 
@@ -95,7 +98,7 @@ supersphere.normal = function ( params={} ) {
 
 	var { exponent } = { ...defaults, ...params };
 
-	return supersphereNormalRaw( exponent );
+	return supersphereNormalRaw( positionGeometry, normalLocal, tangentLocal, exponent );
 
 };
 

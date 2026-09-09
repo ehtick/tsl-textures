@@ -5,7 +5,7 @@ import { uniform, vec3 } from "three/tsl";
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 import { SimplexNoise } from "three/addons/math/SimplexNoise.js";
 
-import { dysonSphere, gasGiant, planet, protozoa, perlinNoise, stars } from "tsl-textures";
+import { dysonSphere, gasGiant, perlinNoise, planet, protozoa, stars } from "tsl-textures";
 
 
 

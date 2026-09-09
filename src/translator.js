@@ -44,14 +44,15 @@ var surfacePos = Fn( ([ pos, distance, selectorAngles, selectorCenter, selectorW
 
 
 
-var translatorRaw = Fn( ([ distance, selectorAngles, selectorCenter, selectorWidth ])=>{
+var translatorRaw = Fn( ([ position, distance, selectorAngles, selectorCenter, selectorWidth ])=>{
 
-	return surfacePos( positionGeometry, distance, selectorAngles, selectorCenter, selectorWidth );
+	return surfacePos( position, distance, selectorAngles, selectorCenter, selectorWidth );
 
 } ).setLayout( {
 	name: 'translatorRaw',
 	type: 'vec3',
 	inputs: [
+		{ name: 'position', type: 'vec3' },
 		{ name: 'distance', type: 'vec3' },
 		{ name: 'selectorAngles', type: 'vec2' },
 		{ name: 'selectorCenter', type: 'vec3' },
@@ -61,13 +62,12 @@ var translatorRaw = Fn( ([ distance, selectorAngles, selectorCenter, selectorWid
 
 
 
-var translatorNormalRaw = Fn( ([ distance, selectorAngles, selectorCenter, selectorWidth ])=>{
+var translatorNormalRaw = Fn( ([ position, normalLoc, tangentLoc, distance, selectorAngles, selectorCenter, selectorWidth ])=>{
 
 	var EPS = 0.01;
 
-	var position = positionGeometry,
-		normal = normalLocal.normalize().toVar(),
-		tangent = tangentLocal.normalize().mul( EPS ).toVar(),
+	var normal = normalLoc.normalize().toVar(),
+		tangent = tangentLoc.normalize().mul( EPS ).toVar(),
 		bitangent = cross( normal, tangent ).normalize().mul( EPS ).toVar();
 
 	var pos = surfacePos( position, distance, selectorAngles, selectorCenter, selectorWidth );
@@ -80,6 +80,9 @@ var translatorNormalRaw = Fn( ([ distance, selectorAngles, selectorCenter, selec
 	name: 'translatorNormalRaw',
 	type: 'vec3',
 	inputs: [
+		{ name: 'position', type: 'vec3' },
+		{ name: 'normalLoc', type: 'vec3' },
+		{ name: 'tangentLoc', type: 'vec3' },
 		{ name: 'distance', type: 'vec3' },
 		{ name: 'selectorAngles', type: 'vec2' },
 		{ name: 'selectorCenter', type: 'vec3' },
@@ -93,7 +96,7 @@ function translator( params={} ) {
 
 	var { distance, selectorAngles, selectorCenter, selectorWidth } = { ...defaults, ...params };
 
-	return translatorRaw( distance, selectorAngles, selectorCenter, selectorWidth );
+	return translatorRaw( positionGeometry, distance, selectorAngles, selectorCenter, selectorWidth );
 
 }
 
@@ -103,7 +106,7 @@ translator.normal = function ( params={} ) {
 
 	var { distance, selectorAngles, selectorCenter, selectorWidth } = { ...defaults, ...params };
 
-	return translatorNormalRaw( distance, selectorAngles, selectorCenter, selectorWidth );
+	return translatorNormalRaw( positionGeometry, normalLocal, tangentLocal, distance, selectorAngles, selectorCenter, selectorWidth );
 
 };
 

@@ -37,14 +37,15 @@ var surfacePos = Fn( ([ pos, scales, center, selectorAngles, selectorCenter, sel
 
 
 
-var scalerRaw = Fn( ([ scales, center, selectorAngles, selectorCenter, selectorWidth ])=>{
+var scalerRaw = Fn( ([ position, scales, center, selectorAngles, selectorCenter, selectorWidth ])=>{
 
-	return surfacePos( positionGeometry, scales, center, selectorAngles, selectorCenter, selectorWidth );
+	return surfacePos( position, scales, center, selectorAngles, selectorCenter, selectorWidth );
 
 } ).setLayout( {
 	name: 'scalerRaw',
 	type: 'vec3',
 	inputs: [
+		{ name: 'position', type: 'vec3' },
 		{ name: 'scales', type: 'vec3' },
 		{ name: 'center', type: 'vec3' },
 		{ name: 'selectorAngles', type: 'vec2' },
@@ -55,13 +56,12 @@ var scalerRaw = Fn( ([ scales, center, selectorAngles, selectorCenter, selectorW
 
 
 
-var scalerNormalRaw = Fn( ([ scales, center, selectorAngles, selectorCenter, selectorWidth ]) => {
+var scalerNormalRaw = Fn( ([ position, normalLoc, tangentLoc, scales, center, selectorAngles, selectorCenter, selectorWidth ]) => {
 
 	var EPS = 0.01;
 
-	var position = positionGeometry,
-		normal = normalLocal.normalize().toVar(),
-		tangent = tangentLocal.normalize().mul( EPS ).toVar(),
+	var normal = normalLoc.normalize().toVar(),
+		tangent = tangentLoc.normalize().mul( EPS ).toVar(),
 		bitangent = cross( normal, tangent ).normalize().mul( EPS ).toVar();
 
 	var pos = surfacePos( position, scales, center, selectorAngles, selectorCenter, selectorWidth );
@@ -74,6 +74,9 @@ var scalerNormalRaw = Fn( ([ scales, center, selectorAngles, selectorCenter, sel
 	name: 'scalerNormalRaw',
 	type: 'vec3',
 	inputs: [
+		{ name: 'position', type: 'vec3' },
+		{ name: 'normalLoc', type: 'vec3' },
+		{ name: 'tangentLoc', type: 'vec3' },
 		{ name: 'scales', type: 'vec3' },
 		{ name: 'center', type: 'vec3' },
 		{ name: 'selectorAngles', type: 'vec2' },
@@ -88,7 +91,7 @@ function scaler( params={} ) {
 
 	var { scales, center, selectorAngles, selectorCenter, selectorWidth } = { ...defaults, ...params };
 
-	return scalerRaw( scales, center, selectorAngles, selectorCenter, selectorWidth );
+	return scalerRaw( positionGeometry, scales, center, selectorAngles, selectorCenter, selectorWidth );
 
 }
 
@@ -98,7 +101,7 @@ scaler.normal = function ( params={} ) {
 
 	var { scales, center, selectorAngles, selectorCenter, selectorWidth } = { ...defaults, ...params };
 
-	return scalerNormalRaw( scales, center, selectorAngles, selectorCenter, selectorWidth );
+	return scalerNormalRaw( positionGeometry, normalLocal, tangentLocal, scales, center, selectorAngles, selectorCenter, selectorWidth );
 
 };
 

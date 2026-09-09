@@ -1,14 +1,17 @@
 # TSL Textures
 
+## 3.0.5
+* Fixed issues with translator, scaler, rotator and supersphere
+
 ## 3.0.4
-Fixed issue #26, merged PR #28
+* Fixed issue #26, merged PR #28
 
 ## 3.0.3
-Fixed Protozoa for WebGPU
+* Fixed "Protozoa" for WebGPU
 
 ## 3.0.2
 * Added "Waves" in *waves.js*
-* Added "Halftone" in *halftone.js"
+* Added "Halftone" in *halftone.js*
 * Added example "Halftone Flight"
 
 ## 3.0.1
